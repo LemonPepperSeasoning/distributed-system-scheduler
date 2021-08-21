@@ -108,7 +108,13 @@ public class ScheduleAStar extends Schedule implements Comparable<ScheduleAStar>
      */
     public void addHeuristic(int h) {
         _h = h;
-        _total = super.getScheduledTask().getFinishTime() + _h;
+        int childTotal = super.getScheduledTask().getFinishTime() + _h;
+        if ( getParent() == null ){
+            _total = childTotal;
+        }else{
+            int parentTotal = getParent().getTotal();
+            _total = Math.max( childTotal , parentTotal );
+        }
     }
 
     public void addWeightedHeuristic(int h) {

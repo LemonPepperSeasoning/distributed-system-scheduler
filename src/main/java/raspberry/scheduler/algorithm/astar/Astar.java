@@ -1,5 +1,7 @@
 package raspberry.scheduler.algorithm.astar;
 
+import java.awt.image.AreaAveragingScaleFilter;
+import java.lang.reflect.Array;
 import java.util.*;
 import java.util.List;
 
@@ -26,6 +28,7 @@ public class Astar implements Algorithm {
     PriorityQueue<ScheduleAStar> _pq;
     Hashtable<String, Integer> _heuristic = new Hashtable<String, Integer>();
     Hashtable<Integer, ArrayList<ScheduleAStar>> _visited;
+    Hashtable<String, Integer> _advancedH;
 
     int _upperBound;
     protected AlgoObservable _observable;
@@ -63,6 +66,11 @@ public class Astar implements Algorithm {
          * --> stores a node and number of incoming edges.
          */
         getH();
+        getHadvanced();
+        System.out.println(_graph);
+        System.out.println(_heuristic);
+        System.out.println(_advancedH);
+
 
 //        Hashtable<Schedule, Hashtable<INode, Integer>> master = new Hashtable<Schedule, Hashtable<INode, Integer>>();
         Hashtable<INode, Integer> rootTable = this.getRootTable();
@@ -80,9 +88,11 @@ public class Astar implements Algorithm {
 
                 newSchedule.addHeuristic(
                         Collections.max(Arrays.asList(
-                                h(newSchedule),
-                                h1(getChildTable(rootTable, node), newSchedule)
-                        )));
+                                0,
+//                                h(newSchedule),
+//                                h1(getChildTable(rootTable, node), newSchedule),
+                                h2(newSchedule)
+                                )));
 //                master.put(newSchedule, getChildTable(rootTable, i));
                 _pq.add(newSchedule);
             }
@@ -145,8 +155,10 @@ public class Astar implements Algorithm {
 
                         newSchedule.addHeuristic(
                                 Collections.max(Arrays.asList(
-                                        h(newSchedule),
-                                        h1(newTable, newSchedule)
+                                        0,
+//                                        h(newSchedule),
+//                                        h1(newTable, newSchedule),
+                                        h2(newSchedule)
                                 )));
 
                         if (newSchedule.getTotal() <= _upperBound){
@@ -209,6 +221,26 @@ public class Astar implements Algorithm {
             sum += i.getValue();
         }
         return sum / _numP - cSchedule.getFinishTime();
+    }
+
+    /**
+     * For each task that was scheduled last in the processor.
+     * -> find the largest cost
+     * --> where cost = finish time of the task + heuristic of the task
+     *
+     * @param cSchedule : current schedule . Used to find the last task which was scheduled for each processor.
+     * @return Integer : Representing the best case scheduling.
+     */
+    public int h2( ScheduleAStar cSchedule) {
+        int max = 0;
+        for (String s : cSchedule.getLastForEachProcessor().values()) {
+            int tmp = _advancedH.get(s) + cSchedule.getScheduling().get(s).get(1) +
+                    _graph.getNode(s).getValue();
+            if (tmp > max) {
+                max = tmp;
+            }
+        }
+        return max - cSchedule.getFinishTime();
     }
 
     /**
@@ -363,5 +395,115 @@ public class Astar implements Algorithm {
             }
         }
         return false;
+    }
+
+    public void getHadvanced(){
+        _advancedH = new Hashtable<String, Integer>();
+
+        Hashtable<INode, Integer> outDegree = new Hashtable<INode, Integer>();
+
+        for (INode node : _graph.getAllNodes() ){
+            outDegree.put( node, _graph.getOutgoingEdges(node).size());
+        }
+
+        while ( true ){
+            if (outDegree.isEmpty()){
+                break;
+            }
+            ArrayList<INode> toDelete = new ArrayList<INode>();
+            for (INode node : outDegree.keySet()) {
+                if ( outDegree.get(node) == 0 ){
+                    _advancedH.put(node.getName(), getMaxHadvance(node) );
+                    toDelete.add(node);
+
+                    List<IEdge> parents = _graph.getIngoingEdges(node);
+                    for ( IEdge edge : parents){
+                        outDegree.put( edge.getParent(), outDegree.get(edge.getParent()) - 1);
+                    }
+                }
+            }
+
+            for (INode i : toDelete){
+                outDegree.remove(i);
+            }
+        }
+    }
+
+    public int getMaxHadvance(INode node){
+        System.out.println(node.getName());
+
+        List<IEdge> outGoingEdges = _graph.getOutgoingEdges(node);
+        if ( outGoingEdges.isEmpty() ){
+            return 0;
+        }else{
+            List<Integer> minGlobal = new ArrayList<Integer>();
+            for (IEdge edge : outGoingEdges){
+                List<IEdge> copyOutGoingEdge = new ArrayList<IEdge>(outGoingEdges);
+                // TODO : keep MAXPID.
+                int pidBound;
+                int numEdge = outGoingEdges.size();
+                if (numEdge > _numP) {
+                    pidBound = _numP;
+                } else {
+                    pidBound = numEdge;
+                }
+
+                copyOutGoingEdge.remove(edge);
+
+                List<Integer> cost = new ArrayList<Integer>();
+                cost.add( _advancedH.get(edge.getChild().getName()) + edge.getChild().getValue() );
+                for (int i = 0; i< pidBound - 1; i++){
+                    cost.add(0);
+                }
+                List<List<Integer>> twoDcost = new ArrayList<List<Integer>>();
+                twoDcost.add(cost);
+
+                List<List<Integer>> x = recursiveAdvanceH( copyOutGoingEdge, twoDcost , pidBound);
+                System.out.println(edge.getChild().getName());
+                System.out.println(x);
+                List<Integer> maxLocal = new ArrayList<Integer>();
+                for ( List<Integer> p : x){
+                    maxLocal.add( Collections.max(p) );
+                }
+                minGlobal.add( Collections.min(maxLocal) );
+            }
+            return Collections.min(minGlobal);
+        }
+    }
+
+    public List<List<Integer>> recursiveAdvanceH( List<IEdge> edges, List< List<Integer> > twoDcost , int maxPid){
+        if (edges.isEmpty()){
+            return twoDcost;
+        }
+
+        List<List<Integer>> final2dCost = new ArrayList<List<Integer>>();
+        for ( IEdge edge : edges ){
+            List<List<Integer>> new2dcost = new ArrayList<List<Integer>>();
+
+            for ( List<Integer> costs : twoDcost){
+                for (int i = 0; i< maxPid ; i++){
+                    List<Integer> copyCosts = new ArrayList<Integer>(costs);
+                    int x;
+                    try{
+                        x = copyCosts.get(i);
+                    }catch(IndexOutOfBoundsException e){
+                        System.out.println("THIS SHOULD NEVER HAPPEN" + e.getMessage());
+                        x = 0;
+                    }
+                    if ( i != 0){
+                        if ( x <= edge.getWeight() ){
+                            x = edge.getWeight();
+                        }
+                    }
+                    x += ( _advancedH.get(edge.getChild().getName()) + edge.getChild().getValue() );
+                    copyCosts.set(i,x);
+                    new2dcost.add(copyCosts);
+                }
+            }
+            List<IEdge> copyEdges = new ArrayList<IEdge>(edges);
+            copyEdges.remove(edge);
+            final2dCost.addAll( recursiveAdvanceH(copyEdges, new2dcost, maxPid));
+        }
+        return final2dCost;
     }
 }
