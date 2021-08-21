@@ -105,6 +105,7 @@ public class Astar implements Algorithm {
             ArrayList<ScheduleAStar> listVisitedForSize = _visited.get(cSchedule.getHash());
 
             if (listVisitedForSize != null && isIrrelevantDuplicate(listVisitedForSize, cSchedule)) {
+                cSchedule = null;
                 duplicate++;
                 continue;
             } else {
@@ -159,11 +160,10 @@ public class Astar implements Algorithm {
                                 _pq.add(newSchedule);
                             }
                         }
-
-
                     }
                 }
             }
+            cSchedule.freeSpace();
         }
         System.out.printf("PQ SIZE: %d\n", _pq.size());
         System.out.printf("\nDUPLCIATE : %d\n", duplicate);
