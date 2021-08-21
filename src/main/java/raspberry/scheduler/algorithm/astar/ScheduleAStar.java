@@ -31,7 +31,7 @@ public class ScheduleAStar extends Schedule implements Comparable<ScheduleAStar>
     private Hashtable<String, List<Integer>> _scheduling; // partial schedule. //TODO : Implement this idea with less memory intensive manner.
     private Hashtable<Integer, String> _lastForEachProcessor; //the last task schedule, for each processor.
     private int _maxPid; //The largest pid currently used to schedule
-    Hashtable<INode, Integer> _inDegreeTable;
+    private Hashtable<INode, Integer> _inDegreeTable;
 
     public ScheduleAStar(ScheduledTask scheduledTask, Hashtable<INode, Integer> inDegreeTable) {
         super(scheduledTask);
@@ -378,6 +378,24 @@ public class ScheduleAStar extends Schedule implements Comparable<ScheduleAStar>
     public int getSize() {
         return super.getSize();
     }
+
+
+    /**
+     * get inDegreeTable
+     * @return  inDegreeTable how many parents left for every available task
+     */
+    public Hashtable<INode, Integer> getInDegreeTable() {
+        return _inDegreeTable;
+    }
+
+    /**
+     * set inDegreeTable
+     * @param inDegreeTable how many parents left for every available task
+     */
+    public void setInDegreeTable(Hashtable<INode, Integer> inDegreeTable) {
+        _inDegreeTable = inDegreeTable;
+    }
+
 
 
     @Override

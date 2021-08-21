@@ -81,7 +81,7 @@ public class Astar implements Algorithm {
                 newSchedule.addHeuristic(
                         Collections.max(Arrays.asList(
                                 h(newSchedule),
-                                h1(getChildTable(rootTable, node), newSchedule)
+                                h1(newSchedule)
                         )));
 //                master.put(newSchedule, getChildTable(rootTable, i));
                 _pq.add(newSchedule);
@@ -121,7 +121,7 @@ public class Astar implements Algorithm {
             }
 //            Hashtable<INode, Integer> cTable = master.get(cSchedule);
 //            master.remove(cSchedule);
-            Hashtable<INode, Integer> cTable = cSchedule._inDegreeTable;
+            Hashtable<INode, Integer> cTable = cSchedule.getInDegreeTable();
             // Find the next empty processor. (
             int currentMaxPid = cSchedule.getMaxPid();
             int pidBound;
@@ -133,7 +133,7 @@ public class Astar implements Algorithm {
             for (INode node : cTable.keySet()) {
                 if (cTable.get(node) == 0) {
                     for (int pid = 1; pid <= pidBound; pid++) {
-                        int start = calculateEarliestStartTime(cSchedule, pid, node);
+                        int start = cSchedule.calculateEarliestStartTime(pid, node, _graph);
 
 
                         Hashtable<INode, Integer> newTable = getChildTable(cTable, node);
@@ -142,11 +142,11 @@ public class Astar implements Algorithm {
                                 cSchedule,
                                 new ScheduledTask(pid, node, start),
                                 newTable);
-
+//                        ScheduleAStar newSchedule = cSchedule.createSubSchedule(new ScheduledTask(pid, node, start), _graph);
                         newSchedule.addHeuristic(
                                 Collections.max(Arrays.asList(
                                         h(newSchedule),
-                                        h1(newTable, newSchedule)
+                                        h1(newSchedule)
                                 )));
 
                         if (newSchedule.getTotal() <= _upperBound){
@@ -195,17 +195,16 @@ public class Astar implements Algorithm {
     /**
      * Find the best case scheduling where all task are evenly spread out throughout the different processors.
      *
-     * @param x         : Hashtable representing the outDegree table. (All the tasks in the table has not been scheduled yet)
      * @param cSchedule : current schedule . Used to find the last task which was scheduled for each processor.
      * @return Integer : Representing the best case scheduling.
      */
-    public int h1(Hashtable<INode, Integer> x, ScheduleAStar cSchedule) {
+    public int h1(ScheduleAStar cSchedule) {
         int sum = 0;
         for (String s : cSchedule.getLastForEachProcessor().values()) {
             sum += cSchedule.getScheduling().get(s).get(1) +
                     _graph.getNode(s).getValue();
         }
-        for (INode i : x.keySet()) {
+        for (INode i : cSchedule.getInDegreeTable().keySet()) {
             sum += i.getValue();
         }
         return sum / _numP - cSchedule.getFinishTime();

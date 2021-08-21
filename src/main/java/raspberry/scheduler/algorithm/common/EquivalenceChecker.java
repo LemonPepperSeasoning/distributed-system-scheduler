@@ -1,5 +1,6 @@
 package raspberry.scheduler.algorithm.common;
 
+import raspberry.scheduler.algorithm.util.Helper;
 import raspberry.scheduler.graph.*;
 
 import java.util.*;
@@ -122,7 +123,7 @@ public class EquivalenceChecker {
     //count all the prefect substring?
     //
     private Schedule swap(Schedule schedule, ScheduledTask m, ScheduledTask taskToSwap){
-
+////
 //        Schedule result;
 //        Schedule cSchedule = schedule.getParent();
 //        ArrayList<ScheduledTask> prevTask = new ArrayList<>();
@@ -140,13 +141,14 @@ public class EquivalenceChecker {
 //        //                            Schedule subSchedule = cSchedule.createSubSchedule(
 //        //                                    new ScheduledTask(numProcessor,task,earliestStartTime), _graph);
 //
-//        int earliestStartTime = calculateEarliestStartTime(cSchedule, taskToSwap.getProcessorID(), m.getTask());
+//        int earliestStartTime = Helper.calculateEarliestStartTime(cSchedule, taskToSwap.getProcessorID(), m.getTask(), _graph);
 //        int mProcessorID = m.getProcessorID();
 //
 //        // create new scheduled Task for m in at a new start Time
 //        ScheduledTask scheduleM = new ScheduledTask( m.getProcessorID(),m.getTask(), m.getOriginalStartTime());
 //        scheduleM.setStartTime(earliestStartTime);
 //        result = cSchedule.getParent().createSubSchedule(scheduleM, _graph);
+//
 //
 //
 //        Collections.reverse(prevTask);
@@ -166,10 +168,10 @@ public class EquivalenceChecker {
 //        ScheduledTask scheduleST = new ScheduledTask( taskToSwap.getProcessorID(),taskToSwap.getTask(), taskToSwap.getOriginalStartTime());
 //        scheduleST.setStartTime(earliestStartTime);
 //        result = result.createSubSchedule(scheduleST,_graph);
-
-
-
-
+//
+//
+//
+//
 //        return result;
         return null;
     }

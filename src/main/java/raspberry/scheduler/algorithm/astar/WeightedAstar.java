@@ -50,7 +50,7 @@ public class WeightedAstar extends Astar implements Algorithm {
                 newSchedule.addWeightedHeuristic(
                         Collections.max(Arrays.asList(
                                 h(newSchedule),
-                                h1(getChildTable(rootTable, node), newSchedule)
+                                h1(newSchedule)
                         )));
 //                master.put(newSchedule, getChildTable(rootTable, i));
                 _pq.add(newSchedule);
@@ -69,7 +69,7 @@ public class WeightedAstar extends Astar implements Algorithm {
             }
 //            Hashtable<INode, Integer> cTable = master.get(cSchedule);
 //            master.remove(cSchedule);
-            Hashtable<INode, Integer> cTable = cSchedule._inDegreeTable;
+            Hashtable<INode, Integer> cTable = cSchedule.getInDegreeTable();
 
             // Find the next empty processor. (
             int currentMaxPid = cSchedule.getMaxPid();
@@ -89,7 +89,7 @@ public class WeightedAstar extends Astar implements Algorithm {
                         newSchedule.addWeightedHeuristic(
                                 Collections.max(Arrays.asList(
                                         h(newSchedule),
-                                        h1(newTable, newSchedule)
+                                        h1(newSchedule)
                                 )));
 //                        master.put(newSchedule, newTable);
                         _pq.add(newSchedule);

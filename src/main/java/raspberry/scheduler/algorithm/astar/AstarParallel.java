@@ -83,7 +83,7 @@ public class AstarParallel extends Astar {
                 newSchedule.addHeuristic(
                         Collections.max(Arrays.asList(
                                 h(newSchedule),
-                                h1(getChildTable(rootTable, node), newSchedule)
+                                h1(newSchedule)
                         )));
                 master.put(newSchedule, getChildTable(rootTable, node));
                 _pq.add(newSchedule);
@@ -184,7 +184,7 @@ public class AstarParallel extends Astar {
             newSchedule.addHeuristic(
                     Collections.max(Arrays.asList(
                             h(newSchedule),
-                            h1(newTable, newSchedule)
+                            h1(newSchedule)
                     )));
             Hashtable<ScheduleAStar, Hashtable<INode, Integer>> subSchedule = new Hashtable<ScheduleAStar, Hashtable<INode, Integer>>();
             subSchedule.put(newSchedule, newTable);

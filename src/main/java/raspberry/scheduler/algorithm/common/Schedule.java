@@ -2,7 +2,10 @@ package raspberry.scheduler.algorithm.common;
 
 
 import raspberry.scheduler.algorithm.sma.MBSchedule;
+import raspberry.scheduler.graph.IEdge;
+import raspberry.scheduler.graph.IGraph;
 import raspberry.scheduler.graph.INode;
+import raspberry.scheduler.graph.exceptions.EdgeDoesNotExistException;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -19,10 +22,8 @@ public class Schedule {
 
     // item that stored in linked list
     private ScheduledTask _scheduledTask;
-
-
     private int _maxPid;
-
+    private Hashtable<INode, Integer> _inDegreeTable;
 
     public Schedule(ScheduledTask scheduledTask){
         _size = 1;
@@ -41,11 +42,32 @@ public class Schedule {
 
     }
 
-    public Schedule createSubschedule(ScheduledTask scheduledTask){
-        return null;
+//    public Schedule createSubSchedule(ScheduledTask scheduledTask){
+//        return null;
+//    }
+
+//    /**
+//     * Create sub-schedule using the calling class as parent
+//     * @deprecated
+//     * @param scheduledTask task to be schedule
+//     * @return sub-schedule
+//     */
+//    public Schedule createSubSchedule(ScheduledTask scheduledTask){
+//        return new Schedule(this, scheduledTask);
+//    }
+//
+    /**
+     * Create sub-schedule using the calling class as parent
+     * @param scheduledTask scheduled task with start time
+     * @param dependencyGraph dependencyGraph
+     * @return sub-schedule
+     */
+    public Schedule createSubSchedule(ScheduledTask scheduledTask, IGraph dependencyGraph){
+        Schedule subSchedule = new Schedule(this, scheduledTask);
+        subSchedule.setInDegreeTable(
+                subSchedule.inDegreeTableWithoutTask(scheduledTask.getTask(),dependencyGraph));
+        return subSchedule;
     }
-
-
 
     /**
      * Gets the full path of the partial schedule.
@@ -105,6 +127,23 @@ public class Schedule {
         this._maxPid = _maxPid;
     }
 
+    /**
+     * get inDegreeTable
+     * @return  inDegreeTable how many parents left for every available task
+     */
+    public Hashtable<INode, Integer> getInDegreeTable() {
+        return _inDegreeTable;
+    }
+
+    /**
+     * set inDegreeTable
+     * @param inDegreeTable how many parents left for every available task
+     */
+    public void setInDegreeTable(Hashtable<INode, Integer> inDegreeTable) {
+        _inDegreeTable = inDegreeTable;
+    }
+
+
 
     /* ============================================================
      *  Duplicate schedule detection
@@ -155,5 +194,78 @@ public class Schedule {
         return result;
     }
 
+    /**
+     * pop the child x, and recalculate dependency
+     * @param dependencyGraph graph which contain the task dependency
+     * @param task task to be scheduled
+     * @return table after popping the child
+     */
+    public Hashtable<INode, Integer> inDegreeTableWithoutTask(INode task, IGraph dependencyGraph){
+        Hashtable<INode, Integer> temp;
+        if (this.getParent()!= null){
+            temp = new Hashtable<INode, Integer>(this.getParent().getInDegreeTable());
+        } else {
+            temp = dependencyGraph.getInDegreeCountOfAllNodes();
+        }
+        temp.remove(task);
+        dependencyGraph.getOutgoingEdges(task.getName()).forEach( edge ->
+                temp.put( edge.getChild(),  temp.get(edge.getChild()) - 1 ));
+        return temp;
+    }
 
+
+    /*
+     *      duplicate detection refactor
+     */
+    /**
+     * Computes the earliest time we can schedule a task in a specific processor.
+     *
+     * @param processorId      : the specific processor we want to schedule task into.
+     * @param nodeToBeSchedule : node/task to be scheduled.
+     * @return Integer : representing the earliest time. (start time)
+     */
+    public int calculateEarliestStartTime(int processorId, INode nodeToBeSchedule, IGraph graph) {
+        // Find last finish parent node
+        // Find last finish time for current processor id.
+        Schedule last_processorId_use = null; //last time processor with "processorId" was used.
+        Schedule cParentSchedule = this;
+
+        while (cParentSchedule != null) {
+            if (cParentSchedule.getScheduledTask().getProcessorID() == processorId) {
+                last_processorId_use = cParentSchedule;
+                break;
+            }
+            cParentSchedule = cParentSchedule.getParent();
+        }
+
+        //last time parent was used. Needs to check for all processor.
+        int finished_time_of_last_parent = 0;
+        if (last_processorId_use != null) {
+            finished_time_of_last_parent = last_processorId_use.getScheduledTask().getFinishTime();
+        }
+
+        cParentSchedule = this;
+        while (cParentSchedule != null) {
+            // for edges in current parent scheduled node
+            INode last_scheduled_node = cParentSchedule.getScheduledTask().getTask();
+            for (IEdge edge : graph.getOutgoingEdges(last_scheduled_node.getName())) {
+
+                // if edge points to  === childNode
+                if (edge.getChild() == nodeToBeSchedule && cParentSchedule.getScheduledTask().getProcessorID() != processorId) {
+                    //last_parent_processor[ cParentSchedule.p_id ] = true;
+                    try {
+                        int communicationWeight = graph.getEdgeWeight(cParentSchedule.getScheduledTask().getTask(), nodeToBeSchedule);
+                        //  finished_time_of_last_parent  <
+                        if (finished_time_of_last_parent < (cParentSchedule.getScheduledTask().getFinishTime() + communicationWeight)) {
+                            finished_time_of_last_parent = cParentSchedule.getScheduledTask().getFinishTime() + communicationWeight;
+                        }
+                    } catch (EdgeDoesNotExistException e) {
+                        System.out.println(e.getMessage());
+                    }
+                }
+            }
+            cParentSchedule = cParentSchedule.getParent();
+        }
+        return finished_time_of_last_parent;
+    }
 }
