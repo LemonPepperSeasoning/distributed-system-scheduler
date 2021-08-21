@@ -31,7 +31,6 @@ public class Astar implements Algorithm {
     Hashtable<String, Integer> _advancedH;
 
     int _upperBound;
-    protected AlgoObservable _observable;
 
     /**
      * Constructor for A*
@@ -46,7 +45,6 @@ public class Astar implements Algorithm {
         _numP = numProcessors;
         _numNode = _graph.getNumNodes();
         _upperBound = upperBound;
-        _observable = AlgoObservable.getInstance();
     }
 
     public Astar(IGraph graphToSolve, int numProcessors) {
@@ -66,10 +64,8 @@ public class Astar implements Algorithm {
          * --> stores a node and number of incoming edges.
          */
         getH();
-        getHadvanced();
-        System.out.println(_graph);
-        System.out.println(_heuristic);
-        System.out.println(_advancedH);
+//        getHadvanced();
+
 
 
 //        Hashtable<Schedule, Hashtable<INode, Integer>> master = new Hashtable<Schedule, Hashtable<INode, Integer>>();
@@ -89,9 +85,9 @@ public class Astar implements Algorithm {
                 newSchedule.addHeuristic(
                         Collections.max(Arrays.asList(
                                 0,
-//                                h(newSchedule),
-//                                h1(getChildTable(rootTable, node), newSchedule),
-                                h2(newSchedule)
+                                h(newSchedule),
+                                h1(getChildTable(rootTable, node), newSchedule)
+//                                h2(newSchedule)
                                 )));
 //                master.put(newSchedule, getChildTable(rootTable, i));
                 _pq.add(newSchedule);
@@ -100,17 +96,11 @@ public class Astar implements Algorithm {
 
         ScheduleAStar cSchedule;
         int duplicate = 0; // Duplicate counter, Used for debugging purposes.
-        _observable.setIterations(0);
-        _observable.setIsFinish(false);
+
       //  System.out.println(_observable.getIterations());
         while (true) {
 //            System.out.printf("PQ SIZE: %d\n", _pq.size());
-            _observable.increment();
-            //System.out.println(_observable.getIterations());
             cSchedule = _pq.poll();
-
-            Solution cScheduleSolution = new Solution(cSchedule, _numP);
-            _observable.setSolution(cScheduleSolution);
 
             ArrayList<ScheduleAStar> listVisitedForSize = _visited.get(cSchedule.getHash());
 
@@ -156,9 +146,9 @@ public class Astar implements Algorithm {
                         newSchedule.addHeuristic(
                                 Collections.max(Arrays.asList(
                                         0,
-//                                        h(newSchedule),
-//                                        h1(newTable, newSchedule),
-                                        h2(newSchedule)
+                                        h(newSchedule),
+                                        h1(newTable, newSchedule)
+//                                        h2(newSchedule)
                                 )));
 
                         if (newSchedule.getTotal() <= _upperBound){
@@ -177,9 +167,6 @@ public class Astar implements Algorithm {
         }
         System.out.printf("PQ SIZE: %d\n", _pq.size());
         System.out.printf("\nDUPLCIATE : %d\n", duplicate);
-
-        _observable.setIsFinish(true);
-        _observable.setSolution(new Solution(cSchedule,_numP));
 
         return new Solution(cSchedule, _numP);
     }
@@ -430,7 +417,6 @@ public class Astar implements Algorithm {
     }
 
     public int getMaxHadvance(INode node){
-        System.out.println(node.getName());
 
         List<IEdge> outGoingEdges = _graph.getOutgoingEdges(node);
         if ( outGoingEdges.isEmpty() ){
@@ -450,20 +436,33 @@ public class Astar implements Algorithm {
 
                 copyOutGoingEdge.remove(edge);
 
-                List<Integer> cost = new ArrayList<Integer>();
-                cost.add( _advancedH.get(edge.getChild().getName()) + edge.getChild().getValue() );
+                List<int[]> cost = new ArrayList<int[]>();
+                cost.add( new int[]{edge.getChild().getValue(),
+                        edge.getChild().getValue() + _advancedH.get(edge.getChild().getName())} );
                 for (int i = 0; i< pidBound - 1; i++){
-                    cost.add(0);
+                    cost.add( new int[]{0,0});
                 }
-                List<List<Integer>> twoDcost = new ArrayList<List<Integer>>();
+                List<List<int[]>> twoDcost = new ArrayList<List<int[]>>();
                 twoDcost.add(cost);
 
-                List<List<Integer>> x = recursiveAdvanceH( copyOutGoingEdge, twoDcost , pidBound);
-                System.out.println(edge.getChild().getName());
-                System.out.println(x);
+                List<List<int[]>> x = recursiveAdvanceH( copyOutGoingEdge, twoDcost , pidBound);
+//                for (List<int[]> x11 : x){
+//                    for (int[] x22 :x11){
+//                        System.out.printf("{%s}",Arrays.toString(x22));
+//                    }
+//                    System.out.println("");
+//                }
+//                System.out.println("\n");
+
                 List<Integer> maxLocal = new ArrayList<Integer>();
-                for ( List<Integer> p : x){
-                    maxLocal.add( Collections.max(p) );
+                for ( List<int[]> p : x){
+                    int max = 0;
+                    for (int[] p1 : p){
+                        if (p1[1] > max){
+                            max = p1[1];
+                        }
+                    }
+                    maxLocal.add( max );
                 }
                 minGlobal.add( Collections.min(maxLocal) );
             }
@@ -471,31 +470,39 @@ public class Astar implements Algorithm {
         }
     }
 
-    public List<List<Integer>> recursiveAdvanceH( List<IEdge> edges, List< List<Integer> > twoDcost , int maxPid){
+    public List<List<int[]>> recursiveAdvanceH( List<IEdge> edges, List< List<int[]> > twoDcost , int maxPid){
         if (edges.isEmpty()){
             return twoDcost;
         }
 
-        List<List<Integer>> final2dCost = new ArrayList<List<Integer>>();
+        List<List<int[]>> final2dCost = new ArrayList<List<int[]>>();
         for ( IEdge edge : edges ){
-            List<List<Integer>> new2dcost = new ArrayList<List<Integer>>();
+            List<List<int[]>> new2dcost = new ArrayList<List<int[]>>();
 
-            for ( List<Integer> costs : twoDcost){
+            for ( List<int[]> costs : twoDcost){
                 for (int i = 0; i< maxPid ; i++){
-                    List<Integer> copyCosts = new ArrayList<Integer>(costs);
-                    int x;
+                    List<int[]> copyCosts = new ArrayList<int[]>();
+                    for (int[] c : costs){
+                        copyCosts.add(new int[]{c[0],c[1]});
+                    }
+
+                    int[] x;
                     try{
                         x = copyCosts.get(i);
                     }catch(IndexOutOfBoundsException e){
                         System.out.println("THIS SHOULD NEVER HAPPEN" + e.getMessage());
-                        x = 0;
+                        x = new int[]{0,0};
                     }
                     if ( i != 0){
-                        if ( x <= edge.getWeight() ){
-                            x = edge.getWeight();
+                        if ( x[0] < edge.getWeight() ){
+                            x[0] = edge.getWeight();
                         }
                     }
-                    x += ( _advancedH.get(edge.getChild().getName()) + edge.getChild().getValue() );
+                    x[0] += edge.getChild().getValue();
+                    int potentialx1 = x[0] + _advancedH.get(edge.getChild().getName());
+                    if ( potentialx1 > x[1] ){
+                        x[1] = potentialx1;
+                    }
                     copyCosts.set(i,x);
                     new2dcost.add(copyCosts);
                 }
@@ -506,4 +513,5 @@ public class Astar implements Algorithm {
         }
         return final2dCost;
     }
+
 }

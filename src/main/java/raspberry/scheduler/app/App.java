@@ -10,6 +10,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import raspberry.scheduler.algorithm.astar.Astar;
+import raspberry.scheduler.algorithm.astar.AstarVisualiser;
 import raspberry.scheduler.algorithm.common.OutputSchedule;
 import raspberry.scheduler.cli.CLIConfig;
 import raspberry.scheduler.graph.IGraph;
@@ -65,7 +66,7 @@ public class App extends Application {
     private void startAlgo() {
         try {
             IGraph graph = _reader.read();
-            Astar astar = new Astar(graph, _config.get_numProcessors(), Integer.MAX_VALUE);
+            AstarVisualiser astar = new AstarVisualiser(graph, _config.get_numProcessors(), Integer.MAX_VALUE);
             OutputSchedule outputSchedule = astar.findPath();
             Writer writer = new Writer(_config.getOutputFile(), graph, outputSchedule);
             writer.write();

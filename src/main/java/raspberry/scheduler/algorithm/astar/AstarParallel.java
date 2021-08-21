@@ -24,7 +24,7 @@ public class AstarParallel extends Astar {
     // concurrentlist of subschedule for threadpool to run
     private ConcurrentLinkedQueue<Hashtable<ScheduleAStar, Hashtable<INode, Integer>>> _subSchedules;
 
-
+    protected AlgoObservable _observable;
     /**
      * Constructor for A*
      *
@@ -35,12 +35,14 @@ public class AstarParallel extends Astar {
         super(graphToSolve, numProcessors, Integer.MAX_VALUE);
         initialiseThreadPool(numCores);
         _subSchedules = new ConcurrentLinkedQueue<Hashtable<ScheduleAStar, Hashtable<INode, Integer>>>();
+        _observable = AlgoObservable.getInstance();
     }
 
     public AstarParallel(IGraph graphToSolve, int numProcessors, int upperbound,int numCores) {
         super(graphToSolve, numProcessors,upperbound);
         initialiseThreadPool(numCores);
         _subSchedules = new ConcurrentLinkedQueue<Hashtable<ScheduleAStar, Hashtable<INode, Integer>>>();
+        _observable = AlgoObservable.getInstance();
     }
 
 
