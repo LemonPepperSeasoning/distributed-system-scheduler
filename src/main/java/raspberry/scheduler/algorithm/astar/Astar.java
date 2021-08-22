@@ -1,18 +1,19 @@
 package raspberry.scheduler.algorithm.astar;
 
-import java.awt.image.AreaAveragingScaleFilter;
-import java.lang.reflect.Array;
+
 import java.util.*;
 import java.util.List;
+import raspberry.scheduler.algorithm.util.Helper;
 
 import raspberry.scheduler.algorithm.Algorithm;
 import raspberry.scheduler.algorithm.common.OutputSchedule;
 import raspberry.scheduler.algorithm.common.ScheduledTask;
 import raspberry.scheduler.algorithm.common.Solution;
-import raspberry.scheduler.app.visualisation.model.AlgoObservable;
 import raspberry.scheduler.graph.*;
 
 import raspberry.scheduler.graph.exceptions.EdgeDoesNotExistException;
+
+import static raspberry.scheduler.algorithm.util.Helper.printPath;
 
 /**
  * Implementation of A star algorithm.
@@ -66,17 +67,12 @@ public class Astar implements Algorithm {
         getH();
 //        getHadvanced();
 
-
-
 //        Hashtable<Schedule, Hashtable<INode, Integer>> master = new Hashtable<Schedule, Hashtable<INode, Integer>>();
         Hashtable<INode, Integer> rootTable = this.getRootTable();
 
         for (INode node : rootTable.keySet()) {
             if (rootTable.get(node) == 0) {
 
-//                ScheduleAStar newSchedule = new ScheduleAStar(
-//                        0, null, node, 1, getChildTable(rootTable, node));
-//
                 ScheduleAStar newSchedule = new ScheduleAStar(
                         new ScheduledTask(1,node, 0),
                         getChildTable(rootTable, node)
@@ -135,8 +131,6 @@ public class Astar implements Algorithm {
                 if (cTable.get(node) == 0) {
                     for (int pid = 1; pid <= pidBound; pid++) {
                         int start = calculateEarliestStartTime(cSchedule, pid, node);
-
-
                         Hashtable<INode, Integer> newTable = getChildTable(cTable, node);
 
                         ScheduleAStar newSchedule = new ScheduleAStar(
@@ -152,11 +146,11 @@ public class Astar implements Algorithm {
 //                                        h2(newSchedule)
                                 )));
 
-                        if (newSchedule.getTotal() <= _upperBound){
+                        if (newSchedule.getTotal() < _upperBound || (newSchedule.getTotal() == _upperBound && newSchedule.getSize() == _numNode )) {
                             ArrayList<ScheduleAStar> listVisitedForSizeV2 = _visited.get(newSchedule.getHash());
                             if (listVisitedForSizeV2 != null && isIrrelevantDuplicate(listVisitedForSizeV2, newSchedule)) {
                                 duplicate++;
-                            }else{
+                            } else {
                                 _pq.add(newSchedule);
                             }
                         }
@@ -372,7 +366,13 @@ public class Astar implements Algorithm {
      */
     public Boolean isIrrelevantDuplicate(ArrayList<ScheduleAStar> scheduleList, ScheduleAStar cSchedule) {
         for (ScheduleAStar s : scheduleList) {
-            if ( s.equals2(cSchedule) ){
+            if ( s.equals3(cSchedule) ){
+//                if ( ! s.equals2(cSchedule)){
+//                    System.out.println(cSchedule);
+//                    System.out.println(s);
+//                    System.out.println("");
+//                }
+
                 if ( s.getTotal() > cSchedule.getTotal()) {
 //                    System.out.printf("%d -> %d\n", s.getTotal(), cSchedule.getTotal());
                     return false;
@@ -446,14 +446,6 @@ public class Astar implements Algorithm {
                 twoDcost.add(cost);
 
                 List<List<int[]>> x = recursiveAdvanceH( copyOutGoingEdge, twoDcost , pidBound);
-//                for (List<int[]> x11 : x){
-//                    for (int[] x22 :x11){
-//                        System.out.printf("{%s}",Arrays.toString(x22));
-//                    }
-//                    System.out.println("");
-//                }
-//                System.out.println("\n");
-
                 List<Integer> maxLocal = new ArrayList<Integer>();
                 for ( List<int[]> p : x){
                     int max = 0;

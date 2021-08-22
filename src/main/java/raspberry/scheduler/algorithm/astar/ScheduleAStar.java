@@ -91,8 +91,8 @@ public class ScheduleAStar extends Schedule implements Comparable<ScheduleAStar>
         } else {
             _maxPid = super.getParent().getMaxPid();
         }
-        _scheduling = (Hashtable<String, List<Integer>>) ((ScheduleAStar) super.getParent()).getScheduling().clone();
-        _lastForEachProcessor = (Hashtable<Integer, String>) ((ScheduleAStar) super.getParent()).getLastForEachProcessor().clone();
+        _scheduling = (Hashtable<String, List<Integer>>) getParent().getScheduling().clone();
+        _lastForEachProcessor = (Hashtable<Integer, String>) getParent().getLastForEachProcessor().clone();
 
         _scheduling.put(scheduledTask.getTask().getName(), Arrays.asList(scheduledTask.getProcessorID(), scheduledTask.getStartTime()));
         _lastForEachProcessor.put(scheduledTask.getProcessorID(), scheduledTask.getTask().getName());
@@ -161,14 +161,14 @@ public class ScheduleAStar extends Schedule implements Comparable<ScheduleAStar>
         } else if (!(otherSchedule instanceof ScheduleAStar)) {
             return false;
         } else {
-            ScheduleAStar schedule = (ScheduleAStar) otherSchedule;
-            if (this.getSize() != schedule.getSize()) {
+            ScheduleAStar oSchedule = (ScheduleAStar) otherSchedule;
+            if (this.getSize() != oSchedule.getSize()) {
                 return false;
-            } else if (this.getMaxPid() != schedule.getMaxPid()) {
+            } else if (this.getMaxPid() != oSchedule.getMaxPid()) {
                 return false;
             } else {
                 // Group by pid. Compare match
-                Hashtable<String, List<Integer>> _scheduling2 = schedule.getScheduling();
+                Hashtable<String, List<Integer>> _scheduling2 = oSchedule.getScheduling();
 
                 Hashtable<Integer, Hashtable<String, Integer>> hash4scheduling = new Hashtable<Integer, Hashtable<String, Integer>>();
                 Hashtable<Integer, Hashtable<String, Integer>> hash4scheduling2 = new Hashtable<Integer, Hashtable<String, Integer>>();
@@ -201,8 +201,8 @@ public class ScheduleAStar extends Schedule implements Comparable<ScheduleAStar>
                         return false;
                     }
                 }
+                return true;
             }
-            return true;
         }
     }
 
@@ -368,25 +368,6 @@ public class ScheduleAStar extends Schedule implements Comparable<ScheduleAStar>
     public int getMaxPid() {
         return _maxPid;
     }
-
-
-//    /**
-//     * get upper bound which Represents the worst case for BNB
-//     *
-//     * @return _upperBound Represents the worst case for BNB
-//     */
-//    public int getUpperBound() {
-//        return _upperBound;
-//    }
-//
-//    /**
-//     * get upper bound which Represents the base case for BNB
-//     *
-//     * @return _lowerBound Represents the base case for BNB
-//     */
-//    public int getLowerBound() {
-//        return _total;
-//    }
 
     public int getSize() {
         return super.getSize();
