@@ -26,7 +26,6 @@ public class BNBParallel extends BNB2{
         _numCores = numCores;
         // Stack - Keeps track of all available/scheduable tasks.
 
-
         stacks = new ArrayList<Stack<ScheduleB>>();
         for (int i=0; i<_numCores; i++){
             stacks.add( new Stack<ScheduleB>() );
@@ -124,7 +123,11 @@ public class BNBParallel extends BNB2{
                     for (int j = 1; j <= pidBound; j++) {
                         int start = calculateCost(cSchedule, j, node);
                         ScheduleB newSchedule = new ScheduleB(cSchedule,new ScheduledTask(j,node,start),getChildTable(cTable,node));
-                        newSchedule.addLowerBound( Math.max( lowerBound_1(newSchedule), _maxCriticalPath ) );
+                        newSchedule.addLowerBound(Collections.max(
+                                Arrays.asList(
+                                        h1(newSchedule),
+                                        lowerBound_1(newSchedule),
+                                        _maxCriticalPath)));
 
                         if ( canPrune( newSchedule , false)){
                             continue;
@@ -147,8 +150,15 @@ public class BNBParallel extends BNB2{
         for (INode i : rootTable.keySet()) {
             if (rootTable.get(i) == 0) {
                 ScheduleB newSchedule = new ScheduleB(
-                        null, new ScheduledTask(1, i,0),getChildTable(rootTable, i));
-                newSchedule.addLowerBound( Math.max(lowerBound_1(newSchedule), _maxCriticalPath) );
+                        new ScheduledTask(1, i,0),
+                        getChildTable(rootTable, i));
+
+                newSchedule.addLowerBound(Collections.max(
+                        Arrays.asList(
+                                h1(newSchedule),
+                                lowerBound_1(newSchedule),
+                                _maxCriticalPath)));
+
                 if ( newSchedule.getLowerBound() > _bound ){
                     continue;
                 }
@@ -195,8 +205,13 @@ public class BNBParallel extends BNB2{
                 if (cTable.get(node) == 0) {
                     for (int j = 1; j <= pidBound; j++) {
                         int start = calculateCost(cSchedule, j, node);
+
                         ScheduleB newSchedule = new ScheduleB(cSchedule,new ScheduledTask(j,node,start),getChildTable(cTable,node));
-                        newSchedule.addLowerBound( Math.max( lowerBound_1(newSchedule), _maxCriticalPath ) );
+                        newSchedule.addLowerBound(Collections.max(
+                                Arrays.asList(
+                                        h1(newSchedule),
+                                        lowerBound_1(newSchedule),
+                                        _maxCriticalPath)));
 
                         if ( canPrune( newSchedule , false)){
                             continue;
