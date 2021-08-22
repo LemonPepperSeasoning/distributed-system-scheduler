@@ -167,6 +167,7 @@ public class AstarParallel extends Astar {
         }
         _observable.setIsFinish(true);
         _observable.setSolution(new Solution(cSchedule, _numP));
+        _threadPool.shutdownNow();
         return new Solution(cSchedule, _numP);
     }
 

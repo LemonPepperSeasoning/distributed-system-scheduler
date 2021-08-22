@@ -80,6 +80,7 @@ public class BNBParallel extends BNB2{
         if (shortestPath == null){
             System.out.println("==== WTF IS WRONG WITH U");
         }
+        _threadPool.shutdownNow();
         return new Solution(shortestPath, _numP);
     }
 

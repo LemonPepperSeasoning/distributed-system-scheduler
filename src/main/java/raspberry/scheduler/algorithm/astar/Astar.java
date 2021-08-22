@@ -46,8 +46,8 @@ public class Astar implements Algorithm {
         _observable = AlgoObservable.getInstance();
     }
 
-    public Astar(IGraph graphToSolve, int numProcessors) {
-    }
+//    public Astar(IGraph graphToSolve, int numProcessors) {
+//    }
 
     /**
      * Compute the optimal scheduling

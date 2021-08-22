@@ -3,6 +3,7 @@ package raspberry.scheduler;
 import raspberry.scheduler.algorithm.Algorithm;
 import raspberry.scheduler.algorithm.astar.Astar;
 import raspberry.scheduler.algorithm.astar.AstarParallel;
+import raspberry.scheduler.algorithm.astar.WeightedAstar;
 import raspberry.scheduler.algorithm.bNb.BNB2;
 import raspberry.scheduler.algorithm.bNb.BNBParallel;
 import raspberry.scheduler.algorithm.common.OutputSchedule;
@@ -59,10 +60,16 @@ public class Main {
 
     private static void runOnce() throws IOException {
         _startTime = System.nanoTime();
-        BNBParallel algo = new BNBParallel(_graph, _config.get_numProcessors(),Integer.MAX_VALUE, _config.getNumCores());
+//        WeightedAstar wA = new WeightedAstar(_graph,_config.get_numProcessors());
+//        OutputSchedule outputBound = wA.findPath();
+//        int upperbound = outputBound.getFinishTime();
+//        wA = null;
+//        outputBound = null;
+            Algorithm algo = new Astar(_graph, _config.get_numProcessors(), Integer.MAX_VALUE);
         algo.findPath();
         //      _threadpool = algo.getThreadPool();
-        Logger.log("BNB Parallel", _config.getDotFile(), _config.get_numProcessors(), Double.toString((System.nanoTime() - _startTime)/1000000000.0));
+        Logger.log("Astar", _config.getDotFile(), _config.get_numProcessors(), Double.toString((System.nanoTime() - _startTime)/1000000000.0));
+        System.out.println("done");
 
     }
 
@@ -78,7 +85,7 @@ public class Main {
         try {
             future.get(30, TimeUnit.SECONDS);
         } catch (TimeoutException e) {
-            Logger.log("BNB Parallel", _config.getDotFile(), _config.get_numProcessors(), "Timeout - 30 seconds");
+            Logger.log("Astar", _config.getDotFile(), _config.get_numProcessors(), "Timeout - 30 seconds");
             System.out.println("process killed");
             //_threadpool.shutdownNow();
             future.cancel(true);
