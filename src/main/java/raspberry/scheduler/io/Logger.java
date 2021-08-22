@@ -41,13 +41,13 @@ public class Logger {
      * @param duration duration of the time
      * @throws IOException for when a file is not called/created properly
      */
-    public static void log(String algoName, String fileName, int numProcessors, double duration) throws IOException {
+    public static void log(String algoName, String fileName, int numProcessors, String duration) throws IOException {
         String[] _dataLines = new String[]{
                 algoName,
                 java.time.LocalDateTime.now().toString(),
                 fileName,
                 Integer.toString(numProcessors),
-                Double.toString(duration/1000000000.0)};
+                duration};
         fileOutput(_dataLines);
     }
 
