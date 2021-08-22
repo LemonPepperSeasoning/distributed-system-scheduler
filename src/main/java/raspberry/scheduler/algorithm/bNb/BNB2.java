@@ -2,6 +2,7 @@ package raspberry.scheduler.algorithm.bNb;
 
 import raspberry.scheduler.algorithm.Algorithm;
 import raspberry.scheduler.algorithm.common.OutputSchedule;
+import raspberry.scheduler.algorithm.common.Schedule;
 import raspberry.scheduler.algorithm.common.Solution;
 import raspberry.scheduler.algorithm.common.ScheduledTask;
 import raspberry.scheduler.algorithm.util.Helper;
@@ -54,9 +55,14 @@ public class BNB2 implements Algorithm {
 
         for (INode i : rootTable.keySet()) {
             if (rootTable.get(i) == 0) {
-                ScheduleB newSchedule = new ScheduleB(
-                        null, new ScheduledTask(1, i,0),getChildTable(rootTable, i));
-                newSchedule.addLowerBound( Math.max(lowerBound_1(newSchedule), _maxCriticalPath) );
+                ScheduleB newSchedule = new ScheduleB(new ScheduledTask(1, i,0),getChildTable(rootTable, i));
+//                newSchedule.addLowerBound( Math.max(lowerBound_1(newSchedule), _maxCriticalPath) );
+                newSchedule.addLowerBound(Collections.max(
+                        Arrays.asList(
+                                h1(newSchedule),
+                                lowerBound_1(newSchedule),
+                                _maxCriticalPath)));
+
                 if ( newSchedule.getLowerBound() > _bound ){
                     continue;
                 }
@@ -103,7 +109,12 @@ public class BNB2 implements Algorithm {
                     for (int j = 1; j <= pidBound; j++) {
                         int start = calculateCost(cSchedule, j, node);
                         ScheduleB newSchedule = new ScheduleB(cSchedule,new ScheduledTask(j,node,start),getChildTable(cTable,node));
-                        newSchedule.addLowerBound( Math.max( lowerBound_1(newSchedule), _maxCriticalPath ) );
+//                        newSchedule.addLowerBound( Math.max( lowerBound_1(newSchedule), _maxCriticalPath ) );
+                        newSchedule.addLowerBound(Collections.max(
+                                Arrays.asList(
+                                        h1(newSchedule),
+                                        lowerBound_1(newSchedule),
+                                        _maxCriticalPath)));
 
                         if ( canPrune( newSchedule , false)){
                             continue;
@@ -293,6 +304,42 @@ public class BNB2 implements Algorithm {
             }
         }
         return max;
+    }
+
+
+    public int h1(ScheduleB schedule){
+        // Get the last finish time for each processor
+        int maxPid = schedule.getMaxPid();
+        boolean[] booleanArray = new boolean[maxPid];
+
+        int sumScheduled = 0;
+        ScheduleB cSchedule = schedule;
+        while ( !allTrue(booleanArray) ){
+            if (cSchedule == null){
+                System.out.println("THIS SHOULD NOT HAPPEN");
+                break;
+            }
+            if ( ! booleanArray[cSchedule.getPid()-1] ){
+                booleanArray[cSchedule.getPid()-1] = true;
+                sumScheduled += cSchedule.getFinishTime();
+            }
+            cSchedule = cSchedule.getParent();
+        }
+
+        // Get sum of all unscheduled tasks
+        int sumUnscheduled = 0;
+        for ( INode node : schedule.getIndegreeTable().keySet() ){
+            sumUnscheduled += node.getValue();
+        }
+
+        return (sumScheduled + sumUnscheduled)/_numP;
+    }
+
+    public static boolean allTrue(boolean[] array) {
+        for (boolean b : array){
+            if ( !b ){ return false;}
+        }
+        return true;
     }
 
 }

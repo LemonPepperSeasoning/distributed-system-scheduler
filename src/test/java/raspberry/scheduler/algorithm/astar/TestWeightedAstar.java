@@ -9,6 +9,7 @@ import raspberry.scheduler.io.GraphReader;
 
 import java.io.FileNotFoundException;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
 /**
@@ -37,6 +38,7 @@ public class TestWeightedAstar {
     public void testNodes7OutTree2Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_7_OutTree.dot", 2);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",28, output.getFinishTime());
     }
 
     /**
@@ -48,6 +50,7 @@ public class TestWeightedAstar {
     public void testNodes8Random2Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_8_Random.dot", 2);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",581,output.getFinishTime());
     }
 
     /**
@@ -59,6 +62,7 @@ public class TestWeightedAstar {
     public void testNodes9SeriesParallel2Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_9_SeriesParallel.dot", 2);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",55,output.getFinishTime());
     }
 
     /**
@@ -70,6 +74,7 @@ public class TestWeightedAstar {
     public void testNodes10Random2Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_10_Random.dot", 2);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",50,output.getFinishTime());
     }
 
     /**
@@ -81,8 +86,22 @@ public class TestWeightedAstar {
     public void testNodes11OutTree2Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_11_OutTree.dot", 2);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",350,output.getFinishTime());
     }
 
+    @Test
+    public void testNodes16_2Processor() throws FileNotFoundException, EdgeDoesNotExistException {
+        // read input graph and find path
+        OutputSchedule output = readAndFindPath("16_466.dot", 2);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",624,output.getFinishTime());
+    }
+
+    @Test
+    public void testNodesBIG_2Processor() throws FileNotFoundException, EdgeDoesNotExistException {
+        // read input graph and find path
+        OutputSchedule output = readAndFindPath("big.dot", 2);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",92,output.getFinishTime());
+    }
 
     /*
      * ===========================================
@@ -100,6 +119,7 @@ public class TestWeightedAstar {
     public void testNodes7OutTree4Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_7_OutTree.dot", 4);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",22,output.getFinishTime());
     }
 
     /**
@@ -111,6 +131,7 @@ public class TestWeightedAstar {
     public void testNodes8Random4Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_8_Random.dot", 4);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",581,output.getFinishTime());
     }
 
     /**
@@ -122,6 +143,7 @@ public class TestWeightedAstar {
     public void testNodes9SeriesParallel4Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_9_SeriesParallel.dot", 4);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",55,output.getFinishTime());
     }
 
     /**
@@ -133,6 +155,7 @@ public class TestWeightedAstar {
     public void testNodes10Random4Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_10_Random.dot", 4);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",50,output.getFinishTime());
     }
 
     /**
@@ -144,6 +167,21 @@ public class TestWeightedAstar {
     public void testNodes11OutTree4Processor() throws FileNotFoundException, EdgeDoesNotExistException {
         // read input graph and find path
         OutputSchedule output = readAndFindPath("Nodes_11_OutTree.dot", 4);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",227,output.getFinishTime());
+    }
+
+    @Test
+    public void testNodes16_5Processor() throws FileNotFoundException, EdgeDoesNotExistException {
+        // read input graph and find path
+        OutputSchedule output = readAndFindPath("16_466.dot", 5);
+        System.out.printf("[ Actual: %d, Found: %d ]\n",466,output.getFinishTime());
+    }
+
+    @Test
+    public void testNodesBIG_4Processor() throws FileNotFoundException, EdgeDoesNotExistException {
+        // read input graph and find path
+        OutputSchedule output = readAndFindPath("big.dot", 5);
+        System.out.printf("[ Actual: ?? , Found: %d ]\n",output.getFinishTime());
     }
 
     /**
