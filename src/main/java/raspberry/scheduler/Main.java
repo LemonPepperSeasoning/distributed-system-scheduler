@@ -26,13 +26,20 @@ public class Main {
             if (CLIConfig.getVisualise()) {
                 startVisualisation(CLIConfig, reader);
             } else {
-                IGraph graph = reader.read();
-                if (COLLECT_STATS_ENABLE) {_startTime = System.nanoTime();}
-                Astar astar = new Astar(graph, CLIConfig.get_numProcessors(), Integer.MAX_VALUE);
-                OutputSchedule outputSchedule = astar.findPath();
-                if (COLLECT_STATS_ENABLE) {Logger.log(CLIConfig, _startTime, System.nanoTime());}
-                Writer writer = new Writer(CLIConfig.getOutputFile(), graph, outputSchedule);
-                writer.write();
+                for(int i = 0; i<10; i++) {
+                    IGraph graph = reader.read();
+                    if (COLLECT_STATS_ENABLE) {
+                        _startTime = System.nanoTime();
+                    }
+                    Astar astar = new Astar(graph, CLIConfig.get_numProcessors(), Integer.MAX_VALUE);
+                    OutputSchedule outputSchedule = astar.findPath();
+                    if (COLLECT_STATS_ENABLE) {
+                        //  Logger.log(CLIConfig, _startTime, System.nanoTime());
+                        Logger.log("AStar", CLIConfig.getDotFile(), CLIConfig.get_numProcessors(), System.nanoTime() - _startTime);
+                    }
+                    Writer writer = new Writer(CLIConfig.getOutputFile(), graph, outputSchedule);
+                    writer.write();
+                }
             }
         } catch (IOException | ParserException e) {
             System.out.println(e.getMessage());
