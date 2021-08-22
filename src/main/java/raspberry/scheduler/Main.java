@@ -28,6 +28,7 @@ public class Main {
     private static ThreadPoolExecutor _threadpool;
 
     public static void main(String[] inputs) throws NumberFormatException {
+        
         try {
             _config = CLIParser.parser(inputs);
             GraphReader reader = new GraphReader(_config.getDotFile());
