@@ -165,6 +165,7 @@ public class AstarParallel extends Astar {
         }
         _algoStats.setIsFinish(true);
         _algoStats.setSolution(new Solution(cSchedule, _numP));
+        _threadPool.shutdownNow();
         return new Solution(cSchedule, _numP);
     }
 
@@ -205,5 +206,7 @@ public class AstarParallel extends Astar {
         });
     }
 
-
+    public void shutdownThreadPool(){
+        _threadPool.shutdownNow();
+    }
 }

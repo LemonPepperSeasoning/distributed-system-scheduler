@@ -264,4 +264,9 @@ public class BNBParallel extends BNB {
         }
         return false;
     }
+
+
+    public void shutdownThreadPool(){
+        _threadPool.shutdownNow();
+    }
 }
