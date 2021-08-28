@@ -41,12 +41,14 @@ public class Logger {
      * @param duration duration of the time
      * @throws IOException for when a file is not called/created properly
      */
-    public static void log(String fileName, int numProcessors, int duration) throws IOException {
+    public static void log(String algoName, String fileName, int numProcessors, int numCores, String duration) throws IOException {
         String[] _dataLines = new String[]{
+                algoName,
                 java.time.LocalDateTime.now().toString(),
                 fileName,
-                String.valueOf(numProcessors),
-                String.valueOf(duration)};
+                Integer.toString(numProcessors),
+                Integer.toString(numCores),
+                duration};
         fileOutput(_dataLines);
     }
 
