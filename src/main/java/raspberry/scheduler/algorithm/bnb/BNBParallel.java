@@ -58,15 +58,15 @@ public class BNBParallel extends BNB {
         Hashtable<INode, Integer> rootTable = getRootTable();
         getH();
 
-        Stack<ScheduleB> rootSchedules = getRootSchedules();
+        Queue<ScheduleB> rootSchedules = getRootSchedules_BFS();
         if (rootSchedules.isEmpty()){
             _algoStats.setSolution(new Solution(shortestPath, _numP));
             return new Solution(shortestPath, _numP);
         }else{
-            Collections.reverse(rootSchedules);
+//            Collections.reverse(rootSchedules);
             int sizeOfrootSchedules = rootSchedules.size();
             for (int i=0; i< sizeOfrootSchedules; i++){
-                stacks.get( i % _numCores).push( rootSchedules.pop() );
+                stacks.get( i % _numCores).push( rootSchedules.remove() );
             }
         }
 
@@ -192,9 +192,9 @@ public class BNBParallel extends BNB {
      * Get "ncore" amount of root schedule.
      * @return : Stack of Schedules
      */
-    public Stack<ScheduleB> getRootSchedules(){
+    public Queue<ScheduleB> getRootSchedules_BFS(){
 
-        Stack<ScheduleB> rootSchedules = new Stack<ScheduleB>();
+        Queue<ScheduleB> rootSchedules = new LinkedList<>();
         Hashtable<INode, Integer> rootTable = getRootTable();
 
         for (INode i : rootTable.keySet()) {
@@ -207,7 +207,7 @@ public class BNBParallel extends BNB {
                 if ( newSchedule.getLowerBound() > _bound ){
                     continue;
                 }
-                rootSchedules.push(newSchedule);
+                rootSchedules.add(newSchedule);
             }
         }
 
@@ -219,7 +219,7 @@ public class BNBParallel extends BNB {
                 break;
             }
 
-            cSchedule = rootSchedules.pop();
+            cSchedule = rootSchedules.remove();
             if ( canPrune( cSchedule, true , false)){
                 continue;
             }
@@ -266,7 +266,7 @@ public class BNBParallel extends BNB {
                     if ( canPrune( newSchedule , false, false)){
                         continue;
                     }
-                    rootSchedules.push(newSchedule);
+                    rootSchedules.add(newSchedule);
                 }
             } else {
                 for (INode node : freeNodes) {
@@ -281,7 +281,7 @@ public class BNBParallel extends BNB {
                         if ( canPrune( newSchedule , false, true)){
                             continue;
                         }
-                        rootSchedules.push(newSchedule);
+                        rootSchedules.add(newSchedule);
                     }
                 }
             }
