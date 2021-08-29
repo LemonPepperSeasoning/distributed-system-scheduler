@@ -1,11 +1,11 @@
 package raspberry.scheduler;
 
 import raspberry.scheduler.algorithm.Algorithm;
-import raspberry.scheduler.algorithm.astar.Astar;
-import raspberry.scheduler.algorithm.astar.AstarParallel;
-import raspberry.scheduler.algorithm.astar.WeightedAstar;
-import raspberry.scheduler.algorithm.bNb.BNB;
-import raspberry.scheduler.algorithm.bNb.BNBParallel;
+import raspberry.scheduler.algorithm.astar.AStar;
+import raspberry.scheduler.algorithm.astar.AStarParallel;
+import raspberry.scheduler.algorithm.astar.WeightedAStar;
+import raspberry.scheduler.algorithm.bnb.BNB;
+import raspberry.scheduler.algorithm.bnb.BNBParallel;
 import raspberry.scheduler.graph.IGraph;
 import raspberry.scheduler.io.GraphReader;
 import raspberry.scheduler.io.Logger;
@@ -33,16 +33,20 @@ public class StatsCollector {
     public static void writeStats() throws IOException {
         for (String file : _inputFiles) {
             String filePath = INPUT_PATH.concat(file);
-            for (int coreNum : _coreNums) {
-                for (int processors : _processorNums) {
-                    for (Classes algo : Classes.values()) {
-                        for (int i = 0; i < 5; i++) {
-                            readAndFindPath(filePath, processors, coreNum, algo);
-                        }
-                    }
-                }
-            }
+            readAndFindPath(filePath, 2, 2, Classes.BNB);
         }
+//        for (String file : _inputFiles) {
+//            String filePath = INPUT_PATH.concat(file);
+//            for (int coreNum : _coreNums) {
+//                for (int processors : _processorNums) {
+//                    for (Classes algo : Classes.values()) {
+//                        for (int i = 0; i < 5; i++) {
+//                            readAndFindPath(filePath, processors, coreNum, algo);
+//                        }
+//                    }
+//                }
+//            }
+//        }
     }
 
 
@@ -71,19 +75,19 @@ public class StatsCollector {
                 if (coreNum != 1) {
                     return;
                 }
-                algorithm = new Astar(graph, numProcessors, Integer.MAX_VALUE);
+                algorithm = new AStar(graph, numProcessors, Integer.MAX_VALUE);
                 break;
             case AstarParallel:
                 if (coreNum == 1) {
                     return;
                 }
-                algorithm = new AstarParallel(graph, numProcessors, Integer.MAX_VALUE);
+                algorithm = new AStarParallel(graph, numProcessors, Integer.MAX_VALUE);
                 break;
             case WeightedAstar:
                 if (coreNum != 1) {
                     return;
                 }
-                algorithm = new WeightedAstar(graph, numProcessors);
+                algorithm = new WeightedAStar(graph, numProcessors);
                 break;
 
             default:
@@ -112,7 +116,7 @@ public class StatsCollector {
             System.out.println("exception has been thrown");
         } finally {
             if (algo == Classes.AstarParallel) {
-                ((AstarParallel) algorithm).shutdownThreadPool();
+                ((AStarParallel) algorithm).shutdownThreadPool();
             } else if (algo == Classes.BNBParallel) {
                 ((BNBParallel) algorithm).shutdownThreadPool();
             }
