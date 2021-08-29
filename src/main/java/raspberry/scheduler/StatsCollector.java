@@ -6,6 +6,7 @@ import raspberry.scheduler.algorithm.astar.AStarParallel;
 import raspberry.scheduler.algorithm.astar.WeightedAStar;
 import raspberry.scheduler.algorithm.bnb.BNB;
 import raspberry.scheduler.algorithm.bnb.BNBParallel;
+
 import raspberry.scheduler.graph.IGraph;
 import raspberry.scheduler.io.GraphReader;
 import raspberry.scheduler.io.Logger;
@@ -47,6 +48,7 @@ public class StatsCollector {
 //                }
 //            }
 //        }
+
     }
 
 
@@ -89,7 +91,6 @@ public class StatsCollector {
                 }
                 algorithm = new WeightedAStar(graph, numProcessors);
                 break;
-
             default:
                 throw new IllegalStateException("Unexpected value: " + algo);
         }
