@@ -1,4 +1,4 @@
-# raspberry-spirits-15-scheduler
+# Distributed system task scheduler
 ![workflow](https://github.com/SoftEng306-2021/project-1-raspberry-spirits-15/actions/workflows/maven.yml/badge.svg)
 
 The project is to develop a branch-and-bound, or A* type algorithm that solves the NP Hard Scheduling problem with the highest possible performance.
